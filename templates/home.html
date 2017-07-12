@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <title>Welcome home</title>
+        <style>
+            .flash_msg {
+                display: block;
+                color: green;
+            }
+        </style>
+    </head>
+    <body>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for message in messages %}
+                <div class="flash_msg">
+                    <p>{{ message }}</p>
+                </div>
+            {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <h1>Welcome home, {{ first_name }}!</h1>
+    </body>
+</html>
