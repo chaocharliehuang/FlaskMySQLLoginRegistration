@@ -20,6 +20,8 @@ def index():
         session['last_name'] = ''
     if 'email' not in session:
         session['email'] = ''
+    if 'login_email' not in session:
+        session['login_email'] = ''
     return render_template('index.html')
 
 @app.route('/register', methods=['POST'])
@@ -78,7 +80,34 @@ def register():
 
 @app.route('/login', methods=['POST'])
 def login():
-    return redirect('/home')
+    email = request.form['email']
+    pw = request.form['pw']
+    session['login_email'] = email
+
+    # FORM VALIDATION
+    if len(email) < 1 or len(pw) < 1:
+        flash('Email and/or password fields cannot be empty!')
+        return redirect('/')
+
+    # LOGIN VALIDATION
+    data = {
+        'email': email,
+        'password': pw
+    }
+    query = "SELECT * FROM users WHERE email = :email LIMIT 1"
+    user = mysql.query_db(query, data)
+    if len(user) != 0:
+        hashed_pw = md5.new(pw + user[0]['salt']).hexdigest()
+        if user[0]['password'] == hashed_pw:
+            session['user_id'] = str(user[0]['id'])
+            session['login_email'] = ''
+            return redirect('/home/' + session['user_id'])
+        else:
+            flash('Password incorrect!')
+            return redirect('/')
+    else:
+        flash('No user with that email address exists!')
+        return redirect('/')
 
 @app.route('/home/<user_id>')
 def homepage(user_id):
